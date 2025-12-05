@@ -1,0 +1,492 @@
+<!DOCTYPE html><html lang="en" class="scroll-smooth"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><meta name="description" content="Step-by-step guide to setting up OAuth authentication with Google and GitHub"><meta name="author" content="Clarity"><!-- Open Graph / Facebook --><meta property="og:type" content="website"><meta property="og:url" content="https://alex-migwi.github.io/clarity-docs/docs/getting-started/authentication/"><meta property="og:title" content="Authentication Setup - Clarity"><meta property="og:description" content="Step-by-step guide to setting up OAuth authentication with Google and GitHub"><meta property="og:site_name" content="Clarity"><!-- Twitter --><meta name="twitter:card" content="summary_large_image"><meta name="twitter:url" content="https://alex-migwi.github.io/clarity-docs/docs/getting-started/authentication/"><meta name="twitter:title" content="Authentication Setup - Clarity"><meta name="twitter:description" content="Step-by-step guide to setting up OAuth authentication with Google and GitHub"><!-- Canonical URL --><link rel="canonical" href="https://alex-migwi.github.io/clarity-docs/docs/getting-started/authentication/"><title>Authentication Setup - Clarity</title><script>
+            // Theme initialization - must run before page renders
+            (function() {
+                const getThemePreference = () => {
+                    if (
+                        typeof localStorage !== "undefined" &&
+                        localStorage.getItem("theme")
+                    ) {
+                        return localStorage.getItem("theme");
+                    }
+                    return window.matchMedia("(prefers-color-scheme: dark)").matches
+                        ? "dark"
+                        : "light";
+                };
+                const theme = getThemePreference();
+                if (theme === "dark") {
+                    document.documentElement.classList.add("dark");
+                } else {
+                    document.documentElement.classList.remove("dark");
+                }
+            })();
+
+            if (typeof localStorage !== "undefined") {
+                const observer = new MutationObserver(() => {
+                    const isDark =
+                        document.documentElement.classList.contains("dark");
+                    localStorage.setItem("theme", isDark ? "dark" : "light");
+                });
+                observer.observe(document.documentElement, {
+                    attributes: true,
+                    attributeFilter: ["class"],
+                });
+            }
+        </script><link rel="stylesheet" href="/clarity-docs/_astro/dashboard.Dx9zh9f3.css">
+<style>.code-block-wrapper[data-astro-cid-a3hy7aej]{position:relative;margin:1.5rem 0}.copy-button[data-astro-cid-a3hy7aej]{position:absolute;top:.5rem;right:.5rem;padding:.5rem;border-radius:.375rem;background:hsl(var(--muted));border:1px solid hsl(var(--border));color:hsl(var(--muted-foreground));cursor:pointer;opacity:0;transition:opacity .2s,background .2s,color .2s;z-index:10}.code-block-wrapper[data-astro-cid-a3hy7aej]:hover .copy-button[data-astro-cid-a3hy7aej]{opacity:1}.copy-button[data-astro-cid-a3hy7aej]:hover{background:hsl(var(--accent));color:hsl(var(--accent-foreground))}.copy-button[data-astro-cid-a3hy7aej].copied{background:hsl(var(--primary));color:hsl(var(--primary-foreground))}.copy-button[data-astro-cid-a3hy7aej] svg[data-astro-cid-a3hy7aej]{width:16px;height:16px;display:block}.hidden[data-astro-cid-a3hy7aej]{display:none}
+</style></head> <body class="bg-background text-foreground min-h-screen flex flex-col"> <header class="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60"> <div class="flex h-16 items-center px-4 sm:px-6 lg:px-8"> <button id="sidebar-toggle" class="mr-4 md:hidden p-2 text-muted-foreground hover:text-foreground"> <span class="sr-only">Open sidebar</span> <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path> </svg> </button> <div class="flex items-center gap-2 font-bold text-xl tracking-tight"> <a href="/clarity-docs/" class="flex items-center gap-3 hover:opacity-80 transition-opacity"> <img src="/clarity-docs/logo.svg" alt="Clarity" class="h-8 w-8"> <span class="text-foreground">Clarity</span> </a> </div> <div class="flex-1"></div> <div class="flex items-center gap-4"> <div class="hidden md:block w-64"> <div class="relative" data-astro-cid-otpdt6jm> <button id="search-trigger" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground bg-muted/50 rounded-md border border-border hover:border-primary transition-colors" data-astro-cid-otpdt6jm> <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" data-astro-cid-otpdt6jm> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" data-astro-cid-otpdt6jm></path> </svg> <span data-astro-cid-otpdt6jm>Search...</span> <kbd class="ml-auto px-2 py-0.5 text-xs bg-background border border-border rounded" data-astro-cid-otpdt6jm>⌘K</kbd> </button> </div> <!-- Search Modal - Portal to body level --> <teleport-search-modal data-astro-cid-otpdt6jm="true"> <div id="search-modal" class="hidden fixed inset-0 z-[9999] overflow-y-auto" style="z-index: 9999 !important;" data-astro-cid-otpdt6jm> <div class="flex min-h-screen items-start justify-center p-4 pt-20" data-astro-cid-otpdt6jm> <div class="fixed inset-0 bg-background/80 backdrop-blur-sm" id="search-backdrop" data-astro-cid-otpdt6jm></div> <div class="relative w-full max-w-2xl bg-background border border-border rounded-lg shadow-lg" data-astro-cid-otpdt6jm> <div class="flex items-center gap-3 px-4 py-3 border-b border-border" data-astro-cid-otpdt6jm> <svg class="w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" data-astro-cid-otpdt6jm> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" data-astro-cid-otpdt6jm></path> </svg> <input id="search-input" type="text" placeholder="Search documentation..." class="flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground" autocomplete="off" data-astro-cid-otpdt6jm> <button id="search-close" class="text-muted-foreground hover:text-foreground" data-astro-cid-otpdt6jm> <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" data-astro-cid-otpdt6jm> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" data-astro-cid-otpdt6jm></path> </svg> </button> </div> <div id="search-results" class="max-h-[60vh] overflow-y-auto p-2" data-astro-cid-otpdt6jm> <div class="px-4 py-8 text-center text-muted-foreground" data-astro-cid-otpdt6jm>
+Start typing to search...
+</div> </div> </div> </div> <script type="module">const u=document.querySelector("teleport-search-modal");if(u){const e=u.querySelector("#search-modal");e&&(document.body.appendChild(e),u.remove())}const c=document.getElementById("search-modal"),b=document.getElementById("search-trigger"),E=document.getElementById("search-close"),C=document.getElementById("search-backdrop"),h=document.getElementById("search-input"),s=document.getElementById("search-results");let x=[],o=-1;async function M(){try{x=await(await fetch("/clarity-docs/search-index.json")).json()}catch(e){console.error("Failed to load search index:",e)}}function I(e){if(!e.trim()){s.innerHTML='<div class="px-4 py-8 text-center text-muted-foreground">Start typing to search...</div>';return}const n=e.toLowerCase(),d=x.filter(t=>t.title&&t.title.toLowerCase().includes(n)||t.description&&t.description.toLowerCase().includes(n)||t.content&&t.content.toLowerCase().includes(n)).slice(0,10);if(d.length===0){s.innerHTML='<div class="px-4 py-8 text-center text-muted-foreground">No results found</div>';return}function g(t,r){if(!t||!r)return t||"";const a=r.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),i=new RegExp(`(${a})`,"gi");return t.replace(i,'<mark class="bg-primary/20 text-foreground rounded px-0.5">$1</mark>')}function L(t,r){if(!t)return"";const a=t.toLowerCase(),i=r.toLowerCase(),l=a.indexOf(i);if(l===-1)return t.substring(0,150)+"...";const p=Math.max(0,l-50),y=Math.min(t.length,l+r.length+100),k=(p>0?"...":"")+t.substring(p,y)+(y<t.length?"...":"");return g(k,r)}s.innerHTML=d.map((t,r)=>`
+      <a href="/docs/${t.slug}" 
+         class="block px-4 py-3 rounded-md hover:bg-muted/50 transition-colors search-result"
+         data-index="${r}">
+        <div class="font-medium text-foreground">${g(t.title||"Untitled",n)}</div>
+        <div class="text-sm text-muted-foreground line-clamp-2 mt-1">${L(t.description||t.content||"",n)}</div>
+      </a>
+    `).join(""),m()}function w(){c?.classList.remove("hidden"),h?.focus(),document.body.style.overflow="hidden",o=-1}function f(){c?.classList.add("hidden"),h.value="",s.innerHTML='<div class="px-4 py-8 text-center text-muted-foreground">Start typing to search...</div>',document.body.style.overflow="",o=-1}function m(){const e=document.querySelectorAll(".search-result");e.forEach(n=>n.classList.remove("bg-muted/50")),o>=0&&o<e.length&&(e[o].classList.add("bg-muted/50"),e[o].scrollIntoView({block:"nearest",behavior:"smooth"}))}function $(e){const n=document.querySelectorAll(".search-result");n.length!==0&&(e.key==="ArrowDown"?(e.preventDefault(),o=Math.min(o+1,n.length-1),m()):e.key==="ArrowUp"?(e.preventDefault(),o=Math.max(o-1,-1),m()):e.key==="Enter"&&o>=0&&(e.preventDefault(),n[o].click()))}b?.addEventListener("click",w);E?.addEventListener("click",f);C?.addEventListener("click",f);document.addEventListener("keydown",e=>{(e.metaKey||e.ctrlKey)&&e.key==="k"&&(e.preventDefault(),w()),e.key==="Escape"&&f(),c&&!c.classList.contains("hidden")&&$(e)});let v;h?.addEventListener("input",e=>{clearTimeout(v),v=setTimeout(()=>{I(e.target.value)},300)});M();</script> </div></teleport-search-modal> </div> <nav class="flex items-center gap-4">  <button id="theme-toggle" type="button" class="relative inline-flex h-10 w-20 items-center rounded-full border-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-border hover:bg-border/80" aria-label="Toggle theme"> <!-- Toggle Track --> <span class="sr-only">Toggle theme</span> <!-- Sliding Button with Icons --> <span id="toggle-slider" class="absolute inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary shadow-lg transform transition-transform duration-200 ease-in-out translate-x-0.5"> <!-- Sun Icon (Shows when light mode is active) --> <svg id="sun-icon" class="h-5 w-5 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path> </svg> <!-- Moon Icon (Shows when dark mode is active) --> <svg id="moon-icon" class="h-5 w-5 text-primary-foreground hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path> </svg> </span> </button> <script>
+    const updateToggle = () => {
+        const isDark = document.documentElement.classList.contains("dark");
+        const sunIcon = document.getElementById("sun-icon");
+        const moonIcon = document.getElementById("moon-icon");
+        const slider = document.getElementById("toggle-slider");
+        
+        if (isDark) {
+            // Dark mode: show moon icon, slide to right
+            sunIcon?.classList.add("hidden");
+            moonIcon?.classList.remove("hidden");
+            slider?.classList.remove("translate-x-0.5");
+            slider?.classList.add("translate-x-[2.625rem]"); // Move to right side
+        } else {
+            // Light mode: show sun icon, slide to left
+            sunIcon?.classList.remove("hidden");
+            moonIcon?.classList.add("hidden");
+            slider?.classList.remove("translate-x-[2.625rem]");
+            slider?.classList.add("translate-x-0.5");
+        }
+    };
+    
+    const handleToggleClick = () => {
+        const element = document.documentElement;
+        element.classList.toggle("dark");
+
+        const isDark = element.classList.contains("dark");
+        localStorage.setItem("theme", isDark ? "dark" : "light");
+        
+        updateToggle();
+    };
+
+    document
+        .getElementById("theme-toggle")
+        ?.addEventListener("click", handleToggleClick);
+    
+    // Initialize toggle state on page load
+    updateToggle();
+</script> </nav> </div> </div> </header> <div class="flex flex-1 pt-16"> <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 transform bg-background border-r border-border transition-transform duration-300 ease-in-out -translate-x-full md:translate-x-0 md:sticky md:top-16 md:h-[calc(100vh-4rem)] md:overflow-y-auto pt-16 md:pt-0"> <nav class="h-full px-4 py-6 overflow-y-auto"> <ul class="space-y-1"> <li class="mt-1"> <a href="/clarity-docs/docs/introduction" class="block py-2 px-3 text-sm rounded-md transition-colors duration-200 text-muted-foreground hover:text-foreground hover:bg-muted/50"> Introduction </a>  </li><li class="mt-1"> <a href="/clarity-docs/docs/deployment" class="block py-2 px-3 text-sm rounded-md transition-colors duration-200 text-muted-foreground hover:text-foreground hover:bg-muted/50"> Deployment Overview </a> <div class="ml-3 border-l border-border pl-3"> <ul class="space-y-1"> <li class="mt-1"> <a href="/clarity-docs/docs/deployment/github-pages" class="block py-2 px-3 text-sm rounded-md transition-colors duration-200 text-muted-foreground hover:text-foreground hover:bg-muted/50"> Deploy to GitHub Pages </a>  </li><li class="mt-1"> <a href="/clarity-docs/docs/deployment/vercel" class="block py-2 px-3 text-sm rounded-md transition-colors duration-200 text-muted-foreground hover:text-foreground hover:bg-muted/50"> Deploy to Vercel </a>  </li><li class="mt-1"> <a href="/clarity-docs/docs/deployment/netlify" class="block py-2 px-3 text-sm rounded-md transition-colors duration-200 text-muted-foreground hover:text-foreground hover:bg-muted/50"> Deploy to Netlify </a>  </li> </ul> </div> </li><li class="mt-1"> <span class="block py-2 px-3 text-sm font-semibold text-foreground mt-4 mb-2"> Getting Started </span> <div class="ml-3 border-l border-border pl-3"> <ul class="space-y-1"> <li class="mt-1"> <a href="/clarity-docs/docs/getting-started/installation" class="block py-2 px-3 text-sm rounded-md transition-colors duration-200 text-muted-foreground hover:text-foreground hover:bg-muted/50"> Getting Started </a>  </li><li class="mt-1"> <a href="/clarity-docs/docs/getting-started/quick-start" class="block py-2 px-3 text-sm rounded-md transition-colors duration-200 text-muted-foreground hover:text-foreground hover:bg-muted/50"> Quick Start for Teams </a>  </li><li class="mt-1"> <a href="/clarity-docs/docs/getting-started/authentication" class="block py-2 px-3 text-sm rounded-md transition-colors duration-200 bg-primary/10 text-primary font-medium"> Authentication Setup </a>  </li> </ul> </div> </li><li class="mt-1"> <span class="block py-2 px-3 text-sm font-semibold text-foreground mt-4 mb-2"> Guides </span> <div class="ml-3 border-l border-border pl-3"> <ul class="space-y-1"> <li class="mt-1"> <a href="/clarity-docs/docs/guides/writing-documentation" class="block py-2 px-3 text-sm rounded-md transition-colors duration-200 text-muted-foreground hover:text-foreground hover:bg-muted/50"> Writing Documentation with Frontmatter </a>  </li><li class="mt-1"> <a href="/clarity-docs/docs/guides/best-practices" class="block py-2 px-3 text-sm rounded-md transition-colors duration-200 text-muted-foreground hover:text-foreground hover:bg-muted/50"> Writing Documentation </a>  </li><li class="mt-1"> <a href="/clarity-docs/docs/guides/customizing-homepage" class="block py-2 px-3 text-sm rounded-md transition-colors duration-200 text-muted-foreground hover:text-foreground hover:bg-muted/50"> Customizing the Homepage </a>  </li> </ul> </div> </li><li class="mt-1"> <span class="block py-2 px-3 text-sm font-semibold text-foreground mt-4 mb-2"> Reference </span> <div class="ml-3 border-l border-border pl-3"> <ul class="space-y-1"> <li class="mt-1"> <a href="/clarity-docs/docs/reference/configuration" class="block py-2 px-3 text-sm rounded-md transition-colors duration-200 text-muted-foreground hover:text-foreground hover:bg-muted/50"> Configuration Guide </a>  </li><li class="mt-1"> <a href="/clarity-docs/docs/reference/components" class="block py-2 px-3 text-sm rounded-md transition-colors duration-200 text-muted-foreground hover:text-foreground hover:bg-muted/50"> Using Components </a>  </li> </ul> </div> </li> </ul> </nav> </aside> <div id="sidebar-backdrop" class="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm md:hidden hidden" aria-hidden="true"></div> <main class="flex-1 min-w-0"> <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex gap-10"> <article class="flex-1 prose dark:prose-invert max-w-4xl prose-headings:scroll-mt-20 prose-a:text-primary hover:prose-a:text-primary/80"> <nav class="flex items-center gap-2 text-sm text-muted-foreground mb-6"> <a href="/clarity-docs/" class="hover:text-foreground transition-colors">Home</a>  <span class="mx-1">/</span> <a href="/clarity-docs/docs/getting-started" class="hover:text-foreground transition-colors"> Getting Started </a> <span class="mx-1">/</span> <span class="text-foreground font-medium">Authentication</span> </nav> <div class="not-prose mb-10"> <h1 class="text-3xl font-semibold mb-4 text-foreground"> Authentication Setup </h1> <p class="text-lg text-muted-foreground leading-relaxed"> Step-by-step guide to setting up OAuth authentication with Google and GitHub </p> </div>  <h1 id="authentication-setup-guide">Authentication Setup Guide</h1>
+<p>Clarity includes built-in authentication using OAuth 2.0 with Google and GitHub. This guide walks you through setting up authentication for your documentation site.</p>
+<h2 id="overview">Overview</h2>
+<p>The authentication system consists of:</p>
+<ul>
+<li><strong>Frontend</strong>: Login page and dashboard built with Astro</li>
+<li><strong>Backend</strong>: Node.js/Express server handling OAuth flows</li>
+<li><strong>OAuth Providers</strong>: Google and GitHub for social login</li>
+</ul>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Before you begin, you’ll need:</p>
+<ul>
+<li>A Google Cloud Console account</li>
+<li>A GitHub account</li>
+<li>Node.js v18 or higher installed</li>
+<li>Basic understanding of OAuth 2.0 flow</li>
+</ul>
+<h2 id="architecture">Architecture</h2>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="mermaid"><code><span class="line"><span style="color:#E1E4E8">graph LR</span></span>
+<span class="line"><span style="color:#E1E4E8">    A[User] --> B[Frontend Login Page]</span></span>
+<span class="line"><span style="color:#E1E4E8">    B --> C[Backend Auth Server]</span></span>
+<span class="line"><span style="color:#E1E4E8">    C --> D[Google OAuth]</span></span>
+<span class="line"><span style="color:#E1E4E8">    C --> E[GitHub OAuth]</span></span>
+<span class="line"><span style="color:#E1E4E8">    D --> C</span></span>
+<span class="line"><span style="color:#E1E4E8">    E --> C</span></span>
+<span class="line"><span style="color:#E1E4E8">    C --> F[Frontend Dashboard]</span></span>
+<span class="line"><span style="color:#E1E4E8">    F --> A</span></span></code></pre>
+<h2 id="backend-setup">Backend Setup</h2>
+<h3 id="step-1-install-backend-dependencies">Step 1: Install Backend Dependencies</h3>
+<p>Navigate to the backend folder and install dependencies:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#79B8FF">cd</span><span style="color:#9ECBFF"> backend</span></span>
+<span class="line"><span style="color:#B392F0">npm</span><span style="color:#9ECBFF"> install</span></span></code></pre>
+<p>This installs:</p>
+<ul>
+<li><code>express</code> - Web server framework</li>
+<li><code>passport</code> - Authentication middleware</li>
+<li><code>passport-google-oauth20</code> - Google OAuth strategy</li>
+<li><code>passport-github</code> - GitHub OAuth strategy</li>
+<li><code>express-session</code> - Session management</li>
+<li><code>cors</code> - Cross-origin resource sharing</li>
+<li><code>dotenv</code> - Environment variable management</li>
+</ul>
+<h3 id="step-2-configure-environment-variables">Step 2: Configure Environment Variables</h3>
+<p>Create a <code>backend/.env</code> file with the following variables:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6A737D"># Session Configuration</span></span>
+<span class="line"><span style="color:#E1E4E8">SESSION_SECRET</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">your-random-secret-min-32-characters-long</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># Google OAuth</span></span>
+<span class="line"><span style="color:#E1E4E8">GOOGLE_CLIENT_ID</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">your-google-oauth-client-id</span></span>
+<span class="line"><span style="color:#E1E4E8">GOOGLE_CLIENT_SECRET</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">your-google-oauth-client-secret</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># GitHub OAuth</span></span>
+<span class="line"><span style="color:#E1E4E8">GITHUB_CLIENT_ID</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">your-github-oauth-client-id</span></span>
+<span class="line"><span style="color:#E1E4E8">GITHUB_CLIENT_SECRET</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">your-github-oauth-client-secret</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># Server Configuration</span></span>
+<span class="line"><span style="color:#E1E4E8">NODE_ENV</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">development</span></span>
+<span class="line"><span style="color:#E1E4E8">PORT</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">3000</span></span>
+<span class="line"><span style="color:#E1E4E8">FRONTEND_URL</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">http://localhost:4321</span></span></code></pre>
+<p><strong>Important Security Notes</strong>:</p>
+<ul>
+<li>Never commit <code>.env</code> files to version control</li>
+<li>Use a strong random string for <code>SESSION_SECRET</code> (minimum 32 characters)</li>
+<li>Keep your OAuth secrets secure</li>
+<li>Use different credentials for development and production</li>
+</ul>
+<h3 id="step-3-generate-session-secret">Step 3: Generate Session Secret</h3>
+<p>Generate a secure session secret:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6A737D"># Using Node.js</span></span>
+<span class="line"><span style="color:#B392F0">node</span><span style="color:#79B8FF"> -e</span><span style="color:#9ECBFF"> "console.log(require('crypto').randomBytes(32).toString('hex'))"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># Using OpenSSL</span></span>
+<span class="line"><span style="color:#B392F0">openssl</span><span style="color:#9ECBFF"> rand</span><span style="color:#79B8FF"> -hex</span><span style="color:#79B8FF"> 32</span></span></code></pre>
+<p>Copy the output to <code>SESSION_SECRET</code> in your <code>.env</code> file.</p>
+<h2 id="google-oauth-setup">Google OAuth Setup</h2>
+<h3 id="step-1-create-google-cloud-project">Step 1: Create Google Cloud Project</h3>
+<ol>
+<li>Go to <a href="https://console.cloud.google.com">Google Cloud Console</a></li>
+<li>Click <strong>Select a project</strong> → <strong>New Project</strong></li>
+<li>Enter a project name (e.g., “Clarity Docs”)</li>
+<li>Click <strong>Create</strong></li>
+</ol>
+<h3 id="step-2-configure-oauth-consent-screen">Step 2: Configure OAuth Consent Screen</h3>
+<ol>
+<li>Navigate to <strong>APIs &#x26; Services</strong> → <strong>OAuth consent screen</strong></li>
+<li>Select <strong>External</strong> user type (unless you have Google Workspace)</li>
+<li>Click <strong>Create</strong></li>
+<li>Fill in required information:
+<ul>
+<li><strong>App name</strong>: Your documentation site name</li>
+<li><strong>User support email</strong>: Your email</li>
+<li><strong>Developer contact information</strong>: Your email</li>
+</ul>
+</li>
+<li>Click <strong>Save and Continue</strong></li>
+<li>Skip adding scopes (default scopes are sufficient)</li>
+<li>Add test users if needed during development</li>
+<li>Click <strong>Save and Continue</strong></li>
+</ol>
+<h3 id="step-3-create-oauth-credentials">Step 3: Create OAuth Credentials</h3>
+<ol>
+<li>Navigate to <strong>APIs &#x26; Services</strong> → <strong>Credentials</strong></li>
+<li>Click <strong>Create Credentials</strong> → <strong>OAuth 2.0 Client ID</strong></li>
+<li>Select <strong>Web application</strong> as application type</li>
+<li>Enter a name (e.g., “Clarity Auth”)</li>
+<li>Add <strong>Authorized JavaScript origins</strong>:
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>http://localhost:3000</span></span></code></pre>
+</li>
+<li>Add <strong>Authorized redirect URIs</strong>:
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>http://localhost:3000/auth/google/callback</span></span></code></pre>
+</li>
+<li>Click <strong>Create</strong></li>
+<li>Copy the <strong>Client ID</strong> and <strong>Client Secret</strong></li>
+<li>Add them to <code>backend/.env</code>:
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#E1E4E8">GOOGLE_CLIENT_ID</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">your-client-id.apps.googleusercontent.com</span></span>
+<span class="line"><span style="color:#E1E4E8">GOOGLE_CLIENT_SECRET</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">your-client-secret</span></span></code></pre>
+</li>
+</ol>
+<h3 id="production-configuration">Production Configuration</h3>
+<p>When deploying to production, add production URLs:</p>
+<p><strong>Authorized JavaScript origins</strong>:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>https://your-backend-domain.com</span></span></code></pre>
+<p><strong>Authorized redirect URIs</strong>:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>https://your-backend-domain.com/auth/google/callback</span></span></code></pre>
+<h2 id="github-oauth-setup">GitHub OAuth Setup</h2>
+<h3 id="step-1-create-oauth-application">Step 1: Create OAuth Application</h3>
+<ol>
+<li>Go to <a href="https://github.com/settings/developers">GitHub Settings</a></li>
+<li>Click <strong>Developer settings</strong> in the left sidebar</li>
+<li>Click <strong>OAuth Apps</strong> → <strong>New OAuth App</strong></li>
+<li>Fill in the application details:
+<ul>
+<li><strong>Application name</strong>: Your documentation site name</li>
+<li><strong>Homepage URL</strong>: <code>http://localhost:4321</code> (development)</li>
+<li><strong>Application description</strong>: Optional description</li>
+<li><strong>Authorization callback URL</strong>: <code>http://localhost:3000/auth/github/callback</code></li>
+</ul>
+</li>
+<li>Click <strong>Register application</strong></li>
+</ol>
+<h3 id="step-2-generate-client-secret">Step 2: Generate Client Secret</h3>
+<ol>
+<li>After registration, you’ll see the <strong>Client ID</strong></li>
+<li>Click <strong>Generate a new client secret</strong></li>
+<li>Copy the client secret immediately (you can’t view it again)</li>
+<li>Add both to <code>backend/.env</code>:
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#E1E4E8">GITHUB_CLIENT_ID</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">your-github-client-id</span></span>
+<span class="line"><span style="color:#E1E4E8">GITHUB_CLIENT_SECRET</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">your-github-client-secret</span></span></code></pre>
+</li>
+</ol>
+<h3 id="production-configuration-1">Production Configuration</h3>
+<p>When deploying to production, update your OAuth App:</p>
+<ol>
+<li>Go to your OAuth App settings</li>
+<li>Update <strong>Homepage URL</strong>: <code>https://your-domain.com</code></li>
+<li>Update <strong>Authorization callback URL</strong>: <code>https://your-backend-domain.com/auth/github/callback</code></li>
+<li>Click <strong>Update application</strong></li>
+</ol>
+<h2 id="testing-authentication-locally">Testing Authentication Locally</h2>
+<h3 id="step-1-start-the-backend-server">Step 1: Start the Backend Server</h3>
+<p>Open a terminal and start the backend:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#79B8FF">cd</span><span style="color:#9ECBFF"> backend</span></span>
+<span class="line"><span style="color:#B392F0">npm</span><span style="color:#9ECBFF"> start</span></span></code></pre>
+<p>You should see:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>Backend server running on http://localhost:3000</span></span></code></pre>
+<h3 id="step-2-start-the-frontend">Step 2: Start the Frontend</h3>
+<p>Open another terminal and start the Astro dev server:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">pnpm</span><span style="color:#9ECBFF"> dev</span></span></code></pre>
+<p>Visit <code>http://localhost:4321</code></p>
+<h3 id="step-3-test-login-flow">Step 3: Test Login Flow</h3>
+<ol>
+<li>Navigate to <code>http://localhost:4321/login</code></li>
+<li>Click <strong>Login with Google</strong> or <strong>Login with GitHub</strong></li>
+<li>Complete the OAuth authorization</li>
+<li>You should be redirected to the dashboard at <code>/dashboard</code></li>
+</ol>
+<h3 id="troubleshooting-local-testing">Troubleshooting Local Testing</h3>
+<p><strong>Issue</strong>: “Redirect URI mismatch”</p>
+<p><strong>Solution</strong>: Ensure your OAuth callback URLs exactly match:</p>
+<ul>
+<li>Google: <code>http://localhost:3000/auth/google/callback</code></li>
+<li>GitHub: <code>http://localhost:3000/auth/github/callback</code></li>
+</ul>
+<p><strong>Issue</strong>: CORS errors in browser console</p>
+<p><strong>Solution</strong>: Verify <code>FRONTEND_URL</code> in <code>backend/.env</code> is set to <code>http://localhost:4321</code></p>
+<p><strong>Issue</strong>: “Cannot GET /auth/user”</p>
+<p><strong>Solution</strong>: Make sure the backend server is running on port 3000</p>
+<h2 id="authentication-endpoints">Authentication Endpoints</h2>
+<p>The backend provides these endpoints:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Endpoint</th><th>Method</th><th>Description</th></tr></thead><tbody><tr><td><code>/auth/google</code></td><td>GET</td><td>Initiate Google OAuth flow</td></tr><tr><td><code>/auth/google/callback</code></td><td>GET</td><td>Google OAuth callback</td></tr><tr><td><code>/auth/github</code></td><td>GET</td><td>Initiate GitHub OAuth flow</td></tr><tr><td><code>/auth/github/callback</code></td><td>GET</td><td>GitHub OAuth callback</td></tr><tr><td><code>/auth/user</code></td><td>GET</td><td>Get current user info</td></tr><tr><td><code>/auth/logout</code></td><td>GET</td><td>Logout and clear session</td></tr></tbody></table>
+<h2 id="frontend-integration">Frontend Integration</h2>
+<h3 id="login-page">Login Page</h3>
+<p>The login page is at <code>src/pages/login.astro</code>:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="astro"><code><span class="line"><span style="color:#6A737D">---</span></span>
+<span class="line"><span style="color:#F97583">const</span><span style="color:#79B8FF"> backendUrl</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> 'http://localhost:3000'</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#6A737D">---</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">&#x3C;</span><span style="color:#85E89D">a</span><span style="color:#B392F0"> href</span><span style="color:#E1E4E8">={</span><span style="color:#9ECBFF">`${</span><span style="color:#E1E4E8">backendUrl</span><span style="color:#9ECBFF">}/auth/google`</span><span style="color:#E1E4E8">}></span></span>
+<span class="line"><span style="color:#E1E4E8">  Login with Google</span></span>
+<span class="line"><span style="color:#E1E4E8">&#x3C;/</span><span style="color:#85E89D">a</span><span style="color:#E1E4E8">></span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">&#x3C;</span><span style="color:#85E89D">a</span><span style="color:#B392F0"> href</span><span style="color:#E1E4E8">={</span><span style="color:#9ECBFF">`${</span><span style="color:#E1E4E8">backendUrl</span><span style="color:#9ECBFF">}/auth/github`</span><span style="color:#E1E4E8">}></span></span>
+<span class="line"><span style="color:#E1E4E8">  Login with GitHub</span></span>
+<span class="line"><span style="color:#E1E4E8">&#x3C;/</span><span style="color:#85E89D">a</span><span style="color:#E1E4E8">></span></span></code></pre>
+<h3 id="protected-dashboard">Protected Dashboard</h3>
+<p>The dashboard at <code>src/pages/dashboard.astro</code> can be protected by checking authentication status:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="astro"><code><span class="line"><span style="color:#6A737D">---</span></span>
+<span class="line"><span style="color:#6A737D">// Check if user is authenticated</span></span>
+<span class="line"><span style="color:#F97583">const</span><span style="color:#79B8FF"> response</span><span style="color:#F97583"> =</span><span style="color:#F97583"> await</span><span style="color:#B392F0"> fetch</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">'http://localhost:3000/auth/user'</span><span style="color:#E1E4E8">, {</span></span>
+<span class="line"><span style="color:#E1E4E8">  credentials: </span><span style="color:#9ECBFF">'include'</span></span>
+<span class="line"><span style="color:#E1E4E8">});</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">if</span><span style="color:#E1E4E8"> (</span><span style="color:#F97583">!</span><span style="color:#E1E4E8">response.ok) {</span></span>
+<span class="line"><span style="color:#F97583">  return</span><span style="color:#E1E4E8"> Astro.</span><span style="color:#B392F0">redirect</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">'/login'</span><span style="color:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">const</span><span style="color:#79B8FF"> user</span><span style="color:#F97583"> =</span><span style="color:#F97583"> await</span><span style="color:#E1E4E8"> response.</span><span style="color:#B392F0">json</span><span style="color:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#6A737D">---</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">&#x3C;</span><span style="color:#85E89D">h1</span><span style="color:#E1E4E8">>Welcome, {user.displayName}!&#x3C;/</span><span style="color:#85E89D">h1</span><span style="color:#E1E4E8">></span></span></code></pre>
+<h2 id="disabling-authentication">Disabling Authentication</h2>
+<p>If you don’t need authentication, you can disable it:</p>
+<ol>
+<li>
+<p>Update <code>clarity.config.ts</code>:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="typescript"><code><span class="line"><span style="color:#B392F0">navigation</span><span style="color:#E1E4E8">: {</span></span>
+<span class="line"><span style="color:#B392F0">  showLogin</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">false</span><span style="color:#E1E4E8">, </span><span style="color:#6A737D">// Hide login button</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+</li>
+<li>
+<p>Delete or ignore the backend folder</p>
+</li>
+<li>
+<p>Remove login and dashboard pages if desired</p>
+</li>
+</ol>
+<h2 id="security-best-practices">Security Best Practices</h2>
+<h3 id="session-management">Session Management</h3>
+<ul>
+<li>Use secure session secrets (minimum 32 characters)</li>
+<li>Enable secure cookies in production (<code>secure: true</code>)</li>
+<li>Set appropriate session expiry times</li>
+<li>Rotate session secrets periodically</li>
+</ul>
+<h3 id="oauth-configuration">OAuth Configuration</h3>
+<ul>
+<li>Never commit OAuth secrets to version control</li>
+<li>Use different credentials for development and production</li>
+<li>Regularly review authorized applications</li>
+<li>Monitor OAuth app usage for suspicious activity</li>
+</ul>
+<h3 id="cors-configuration">CORS Configuration</h3>
+<ul>
+<li>Only allow your frontend domain in CORS settings</li>
+<li>Use specific origins instead of <code>*</code></li>
+<li>Enable credentials only when needed</li>
+</ul>
+<h3 id="environment-variables">Environment Variables</h3>
+<ul>
+<li>Use <code>.env</code> files for local development</li>
+<li>Use platform environment variables in production</li>
+<li>Never log sensitive environment variables</li>
+<li>Validate environment variables on startup</li>
+</ul>
+<h2 id="advanced-configuration">Advanced Configuration</h2>
+<h3 id="custom-user-storage">Custom User Storage</h3>
+<p>By default, user data is stored in session memory. For production, consider:</p>
+<p><strong>Using a Database</strong>:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="javascript"><code><span class="line"><span style="color:#E1E4E8">passport.</span><span style="color:#B392F0">serializeUser</span><span style="color:#E1E4E8">((</span><span style="color:#FFAB70">user</span><span style="color:#E1E4E8">, </span><span style="color:#FFAB70">done</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">=></span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#6A737D">  // Save user to database</span></span>
+<span class="line"><span style="color:#B392F0">  done</span><span style="color:#E1E4E8">(</span><span style="color:#79B8FF">null</span><span style="color:#E1E4E8">, user.id);</span></span>
+<span class="line"><span style="color:#E1E4E8">});</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">passport.</span><span style="color:#B392F0">deserializeUser</span><span style="color:#E1E4E8">((</span><span style="color:#FFAB70">id</span><span style="color:#E1E4E8">, </span><span style="color:#FFAB70">done</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">=></span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#6A737D">  // Fetch user from database</span></span>
+<span class="line"><span style="color:#E1E4E8">  User.</span><span style="color:#B392F0">findById</span><span style="color:#E1E4E8">(id, (</span><span style="color:#FFAB70">err</span><span style="color:#E1E4E8">, </span><span style="color:#FFAB70">user</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">=></span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#B392F0">    done</span><span style="color:#E1E4E8">(err, user);</span></span>
+<span class="line"><span style="color:#E1E4E8">  });</span></span>
+<span class="line"><span style="color:#E1E4E8">});</span></span></code></pre>
+<p><strong>Using Redis Sessions</strong>:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="javascript"><code><span class="line"><span style="color:#F97583">const</span><span style="color:#79B8FF"> RedisStore</span><span style="color:#F97583"> =</span><span style="color:#B392F0"> require</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">'connect-redis'</span><span style="color:#E1E4E8">).default;</span></span>
+<span class="line"><span style="color:#F97583">const</span><span style="color:#E1E4E8"> { </span><span style="color:#79B8FF">createClient</span><span style="color:#E1E4E8"> } </span><span style="color:#F97583">=</span><span style="color:#B392F0"> require</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">'redis'</span><span style="color:#E1E4E8">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">const</span><span style="color:#79B8FF"> redisClient</span><span style="color:#F97583"> =</span><span style="color:#B392F0"> createClient</span><span style="color:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#E1E4E8">redisClient.</span><span style="color:#B392F0">connect</span><span style="color:#E1E4E8">();</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">app.</span><span style="color:#B392F0">use</span><span style="color:#E1E4E8">(</span><span style="color:#B392F0">session</span><span style="color:#E1E4E8">({</span></span>
+<span class="line"><span style="color:#E1E4E8">  store: </span><span style="color:#F97583">new</span><span style="color:#B392F0"> RedisStore</span><span style="color:#E1E4E8">({ client: redisClient }),</span></span>
+<span class="line"><span style="color:#E1E4E8">  secret: process.env.</span><span style="color:#79B8FF">SESSION_SECRET</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#E1E4E8">  resave: </span><span style="color:#79B8FF">false</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#E1E4E8">  saveUninitialized: </span><span style="color:#79B8FF">false</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#E1E4E8">}));</span></span></code></pre>
+<h3 id="adding-more-oauth-providers">Adding More OAuth Providers</h3>
+<p>To add providers like Twitter, LinkedIn, or Microsoft:</p>
+<ol>
+<li>
+<p>Install the passport strategy:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">npm</span><span style="color:#9ECBFF"> install</span><span style="color:#9ECBFF"> passport-twitter</span></span></code></pre>
+</li>
+<li>
+<p>Configure the strategy in <code>server.js</code>:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="javascript"><code><span class="line"><span style="color:#F97583">const</span><span style="color:#79B8FF"> TwitterStrategy</span><span style="color:#F97583"> =</span><span style="color:#B392F0"> require</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">'passport-twitter'</span><span style="color:#E1E4E8">).Strategy;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">passport.</span><span style="color:#B392F0">use</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">new</span><span style="color:#B392F0"> TwitterStrategy</span><span style="color:#E1E4E8">({</span></span>
+<span class="line"><span style="color:#E1E4E8">  consumerKey: process.env.</span><span style="color:#79B8FF">TWITTER_CONSUMER_KEY</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#E1E4E8">  consumerSecret: process.env.</span><span style="color:#79B8FF">TWITTER_CONSUMER_SECRET</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#E1E4E8">  callbackURL: </span><span style="color:#9ECBFF">'/auth/twitter/callback'</span></span>
+<span class="line"><span style="color:#E1E4E8">},</span></span>
+<span class="line"><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">token</span><span style="color:#E1E4E8">, </span><span style="color:#FFAB70">tokenSecret</span><span style="color:#E1E4E8">, </span><span style="color:#FFAB70">profile</span><span style="color:#E1E4E8">, </span><span style="color:#FFAB70">done</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">=></span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#F97583">  return</span><span style="color:#B392F0"> done</span><span style="color:#E1E4E8">(</span><span style="color:#79B8FF">null</span><span style="color:#E1E4E8">, profile);</span></span>
+<span class="line"><span style="color:#E1E4E8">}));</span></span></code></pre>
+</li>
+<li>
+<p>Add authentication routes:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="javascript"><code><span class="line"><span style="color:#E1E4E8">app.</span><span style="color:#B392F0">get</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">'/auth/twitter'</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#E1E4E8">  passport.</span><span style="color:#B392F0">authenticate</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">'twitter'</span><span style="color:#E1E4E8">));</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">app.</span><span style="color:#B392F0">get</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">'/auth/twitter/callback'</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#E1E4E8">  passport.</span><span style="color:#B392F0">authenticate</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">'twitter'</span><span style="color:#E1E4E8">, { failureRedirect: </span><span style="color:#9ECBFF">'/login'</span><span style="color:#E1E4E8"> }),</span></span>
+<span class="line"><span style="color:#E1E4E8">  (</span><span style="color:#FFAB70">req</span><span style="color:#E1E4E8">, </span><span style="color:#FFAB70">res</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">=></span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">    res.</span><span style="color:#B392F0">redirect</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">`${</span><span style="color:#79B8FF">FRONTEND_URL</span><span style="color:#9ECBFF">}/dashboard`</span><span style="color:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#E1E4E8">  });</span></span></code></pre>
+</li>
+</ol>
+<h3 id="custom-session-duration">Custom Session Duration</h3>
+<p>Modify session expiry in <code>backend/server.js</code>:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="javascript"><code><span class="line"><span style="color:#E1E4E8">app.</span><span style="color:#B392F0">use</span><span style="color:#E1E4E8">(</span><span style="color:#B392F0">session</span><span style="color:#E1E4E8">({</span></span>
+<span class="line"><span style="color:#E1E4E8">  secret: process.env.</span><span style="color:#79B8FF">SESSION_SECRET</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#E1E4E8">  resave: </span><span style="color:#79B8FF">false</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#E1E4E8">  saveUninitialized: </span><span style="color:#79B8FF">false</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#E1E4E8">  cookie: {</span></span>
+<span class="line"><span style="color:#E1E4E8">    secure: process.env.</span><span style="color:#79B8FF">NODE_ENV</span><span style="color:#F97583"> ===</span><span style="color:#9ECBFF"> 'production'</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#E1E4E8">    maxAge: </span><span style="color:#79B8FF">7</span><span style="color:#F97583"> *</span><span style="color:#79B8FF"> 24</span><span style="color:#F97583"> *</span><span style="color:#79B8FF"> 60</span><span style="color:#F97583"> *</span><span style="color:#79B8FF"> 60</span><span style="color:#F97583"> *</span><span style="color:#79B8FF"> 1000</span><span style="color:#6A737D"> // 7 days</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#E1E4E8">}));</span></span></code></pre>
+<h2 id="next-steps">Next Steps</h2>
+<p>After setting up authentication:</p>
+<ol>
+<li><strong>Deploy Backend</strong> - Follow the <a href="/docs/deployment">Deployment Guide</a> to deploy your backend</li>
+<li><strong>Protect Routes</strong> - Add authentication checks to pages that need protection</li>
+<li><strong>Customize UI</strong> - Update login and dashboard pages with your branding</li>
+<li><strong>Add User Features</strong> - Build features like user profiles, preferences, or bookmarks</li>
+<li><strong>Monitor Usage</strong> - Set up logging and analytics for authentication events</li>
+</ol>
+<h2 id="resources">Resources</h2>
+<ul>
+<li><a href="http://www.passportjs.org/docs/">Passport.js Documentation</a></li>
+<li><a href="https://developers.google.com/identity/protocols/oauth2">Google OAuth 2.0 Guide</a></li>
+<li><a href="https://docs.github.com/en/developers/apps/building-oauth-apps">GitHub OAuth Documentation</a></li>
+<li><a href="https://github.com/expressjs/session">Express Session Documentation</a></li>
+</ul>
+<hr> <nav class="mt-12 pt-8 border-t border-border grid grid-cols-1 sm:grid-cols-2 gap-4"><a href="/clarity-docs/docs/getting-started/quick-start" class="group flex flex-col gap-2 p-4 rounded-lg border border-border hover:border-primary transition-colors"><span class="text-sm text-muted-foreground">Previous</span><span class="font-medium group-hover:text-primary transition-colors flex items-center gap-2"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>Quick Start for Teams</span></a><a href="/clarity-docs/docs/guides/writing-documentation" class="group flex flex-col gap-2 p-4 rounded-lg border border-border hover:border-primary transition-colors text-right sm:ml-auto"><span class="text-sm text-muted-foreground">Next</span><span class="font-medium group-hover:text-primary transition-colors flex items-center gap-2 justify-end">Writing Documentation with Frontmatter<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></span></a></nav>  <script type="module">function r(){document.querySelectorAll("pre").forEach(t=>{if(t.querySelector(".copy-button"))return;const o=document.createElement("div");o.className="code-block-wrapper",t.parentNode?.insertBefore(o,t),o.appendChild(t);const e=document.createElement("button");e.className="copy-button",e.setAttribute("aria-label","Copy code"),e.innerHTML=`
+        <svg class="copy-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+        <svg class="check-icon hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      `,e.addEventListener("click",async()=>{const n=t.querySelector("code");if(!n)return;const i=n.textContent||"";try{await navigator.clipboard.writeText(i);const c=e.querySelector(".copy-icon"),s=e.querySelector(".check-icon");c?.classList.add("hidden"),s?.classList.remove("hidden"),e.classList.add("copied"),setTimeout(()=>{c?.classList.remove("hidden"),s?.classList.add("hidden"),e.classList.remove("copied")},2e3)}catch(c){console.error("Failed to copy:",c)}}),o.appendChild(e)})}r();document.addEventListener("astro:page-load",r);</script>  <div class="mt-12 pt-8 border-t border-border"><div class="flex flex-col items-center gap-4 p-6 bg-muted/30 rounded-lg"><h3 class="text-lg font-semibold text-foreground">Was this page helpful?</h3><div class="flex gap-3" id="feedback-buttons"><button data-feedback="yes" class="px-6 py-2.5 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-medium flex items-center gap-2"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"></path></svg>
+Yes
+</button><button data-feedback="no" class="px-6 py-2.5 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors font-medium flex items-center gap-2"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"></path></svg>
+No
+</button></div><div id="feedback-message" class="hidden text-center"><p class="text-sm text-muted-foreground">Thank you for your feedback!</p></div><div id="feedback-form" class="hidden w-full max-w-md"><textarea id="feedback-text" placeholder="Tell us more (optional)..." class="w-full px-4 py-3 border border-border rounded-md bg-background text-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary" rows="3"></textarea><div class="flex gap-2 mt-3"><button id="submit-feedback" class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors text-sm font-medium">
+Submit
+</button><button id="skip-feedback" class="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors text-sm font-medium">
+Skip
+</button></div></div></div></div><script type="module">function l(){const t=document.getElementById("feedback-buttons"),s=document.getElementById("feedback-message"),n=document.getElementById("feedback-form"),m=document.querySelector('[data-feedback="yes"]'),r=document.querySelector('[data-feedback="no"]'),u=document.getElementById("submit-feedback"),f=document.getElementById("skip-feedback"),k=document.getElementById("feedback-text");if(!t||!s||!n)return;let c="";function d(){t?.classList.add("hidden"),n?.classList.add("hidden"),s?.classList.remove("hidden")}function b(e){c=e,t?.classList.add("hidden"),n?.classList.remove("hidden")}m?.addEventListener("click",()=>{a("yes",""),d()}),r?.addEventListener("click",()=>{b("no")}),u?.addEventListener("click",()=>{const e=k?.value||"";a(c,e),d()}),f?.addEventListener("click",()=>{a(c,""),d()});function a(e,g){const o={helpful:e,comment:g,page:window.location.pathname,timestamp:new Date().toISOString()};console.log("Feedback:",o);const i=JSON.parse(localStorage.getItem("clarity-feedback")||"[]");i.push(o),localStorage.setItem("clarity-feedback",JSON.stringify(i))}}l();document.addEventListener("astro:page-load",l);</script> <div class="mt-8 pt-8 border-t border-border text-sm text-muted-foreground"><div class="flex flex-col sm:flex-row gap-4 justify-between"><div class="flex items-center gap-2"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span>Last updated: 2025-12-03</span></div><div class="flex items-center gap-2"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg><span>Contributors: Clarity Team</span></div></div></div> <div class="mt-8 pt-8 border-t border-border"><a href="https://github.com/alex-migwi/clarity/edit/main/src/content/docs/getting-started/authentication.md" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>Edit this page on GitHub</a></div> </article> <aside class="hidden xl:block w-64 flex-shrink-0"> <div class="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto"> <h2 class="font-semibold mb-4 text-sm">
+On this page
+</h2> <nav class="text-sm" id="table-of-contents"> <ul class="space-y-2.5"> <li class="pl-0 relative"> <a href="#authentication-setup-guide" data-toc-link data-target="authentication-setup-guide" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Authentication Setup Guide </a> </li><li class="pl-3 relative"> <a href="#overview" data-toc-link data-target="overview" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Overview </a> </li><li class="pl-3 relative"> <a href="#prerequisites" data-toc-link data-target="prerequisites" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Prerequisites </a> </li><li class="pl-3 relative"> <a href="#architecture" data-toc-link data-target="architecture" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Architecture </a> </li><li class="pl-3 relative"> <a href="#backend-setup" data-toc-link data-target="backend-setup" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Backend Setup </a> </li><li class="pl-6 relative"> <a href="#step-1-install-backend-dependencies" data-toc-link data-target="step-1-install-backend-dependencies" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Step 1: Install Backend Dependencies </a> </li><li class="pl-6 relative"> <a href="#step-2-configure-environment-variables" data-toc-link data-target="step-2-configure-environment-variables" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Step 2: Configure Environment Variables </a> </li><li class="pl-6 relative"> <a href="#step-3-generate-session-secret" data-toc-link data-target="step-3-generate-session-secret" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Step 3: Generate Session Secret </a> </li><li class="pl-3 relative"> <a href="#google-oauth-setup" data-toc-link data-target="google-oauth-setup" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Google OAuth Setup </a> </li><li class="pl-6 relative"> <a href="#step-1-create-google-cloud-project" data-toc-link data-target="step-1-create-google-cloud-project" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Step 1: Create Google Cloud Project </a> </li><li class="pl-6 relative"> <a href="#step-2-configure-oauth-consent-screen" data-toc-link data-target="step-2-configure-oauth-consent-screen" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Step 2: Configure OAuth Consent Screen </a> </li><li class="pl-6 relative"> <a href="#step-3-create-oauth-credentials" data-toc-link data-target="step-3-create-oauth-credentials" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Step 3: Create OAuth Credentials </a> </li><li class="pl-6 relative"> <a href="#production-configuration" data-toc-link data-target="production-configuration" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Production Configuration </a> </li><li class="pl-3 relative"> <a href="#github-oauth-setup" data-toc-link data-target="github-oauth-setup" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> GitHub OAuth Setup </a> </li><li class="pl-6 relative"> <a href="#step-1-create-oauth-application" data-toc-link data-target="step-1-create-oauth-application" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Step 1: Create OAuth Application </a> </li><li class="pl-6 relative"> <a href="#step-2-generate-client-secret" data-toc-link data-target="step-2-generate-client-secret" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Step 2: Generate Client Secret </a> </li><li class="pl-6 relative"> <a href="#production-configuration-1" data-toc-link data-target="production-configuration-1" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Production Configuration </a> </li><li class="pl-3 relative"> <a href="#testing-authentication-locally" data-toc-link data-target="testing-authentication-locally" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Testing Authentication Locally </a> </li><li class="pl-6 relative"> <a href="#step-1-start-the-backend-server" data-toc-link data-target="step-1-start-the-backend-server" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Step 1: Start the Backend Server </a> </li><li class="pl-6 relative"> <a href="#step-2-start-the-frontend" data-toc-link data-target="step-2-start-the-frontend" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Step 2: Start the Frontend </a> </li><li class="pl-6 relative"> <a href="#step-3-test-login-flow" data-toc-link data-target="step-3-test-login-flow" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Step 3: Test Login Flow </a> </li><li class="pl-6 relative"> <a href="#troubleshooting-local-testing" data-toc-link data-target="troubleshooting-local-testing" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Troubleshooting Local Testing </a> </li><li class="pl-3 relative"> <a href="#authentication-endpoints" data-toc-link data-target="authentication-endpoints" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Authentication Endpoints </a> </li><li class="pl-3 relative"> <a href="#frontend-integration" data-toc-link data-target="frontend-integration" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Frontend Integration </a> </li><li class="pl-6 relative"> <a href="#login-page" data-toc-link data-target="login-page" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Login Page </a> </li><li class="pl-6 relative"> <a href="#protected-dashboard" data-toc-link data-target="protected-dashboard" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Protected Dashboard </a> </li><li class="pl-3 relative"> <a href="#disabling-authentication" data-toc-link data-target="disabling-authentication" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Disabling Authentication </a> </li><li class="pl-3 relative"> <a href="#security-best-practices" data-toc-link data-target="security-best-practices" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Security Best Practices </a> </li><li class="pl-6 relative"> <a href="#session-management" data-toc-link data-target="session-management" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Session Management </a> </li><li class="pl-6 relative"> <a href="#oauth-configuration" data-toc-link data-target="oauth-configuration" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> OAuth Configuration </a> </li><li class="pl-6 relative"> <a href="#cors-configuration" data-toc-link data-target="cors-configuration" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> CORS Configuration </a> </li><li class="pl-6 relative"> <a href="#environment-variables" data-toc-link data-target="environment-variables" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Environment Variables </a> </li><li class="pl-3 relative"> <a href="#advanced-configuration" data-toc-link data-target="advanced-configuration" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Advanced Configuration </a> </li><li class="pl-6 relative"> <a href="#custom-user-storage" data-toc-link data-target="custom-user-storage" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Custom User Storage </a> </li><li class="pl-6 relative"> <a href="#adding-more-oauth-providers" data-toc-link data-target="adding-more-oauth-providers" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Adding More OAuth Providers </a> </li><li class="pl-6 relative"> <a href="#custom-session-duration" data-toc-link data-target="custom-session-duration" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Custom Session Duration </a> </li><li class="pl-3 relative"> <a href="#next-steps" data-toc-link data-target="next-steps" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Next Steps </a> </li><li class="pl-3 relative"> <a href="#resources" data-toc-link data-target="resources" class="block text-muted-foreground hover:text-primary transition-colors duration-200 line-clamp-2 border-l-2 border-transparent hover:border-primary pl-3 -ml-[2px]"> Resources </a> </li> </ul> </nav> <script type="module">function a(){const r=document.querySelectorAll("[data-toc-link]"),o=Array.from(document.querySelectorAll("h1, h2, h3, h4, h5, h6")).filter(t=>t.id);if(r.length===0||o.length===0)return;const s=new IntersectionObserver(t=>{t.forEach(n=>{const d=n.target.getAttribute("id"),e=document.querySelector(`[data-target="${d}"]`);n.isIntersecting&&(r.forEach(i=>{i.classList.remove("text-primary","border-primary","font-medium"),i.classList.add("text-muted-foreground","border-transparent")}),e&&(e.classList.remove("text-muted-foreground","border-transparent"),e.classList.add("text-primary","border-primary","font-medium")))})},{rootMargin:"-100px 0px -66%",threshold:0});o.forEach(t=>s.observe(t))}a();document.addEventListener("astro:page-load",a);</script> </div> </aside> </div> <footer class="mt-20 border-t border-border py-8 text-sm text-muted-foreground"> <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"> <div class="flex flex-col md:flex-row justify-between items-center gap-4"> <p>© 2025 Clarity. All rights reserved.</p> <nav class="flex flex-wrap gap-6 justify-center"> <a href="https://alex-migwi.github.io/clarity-docs" class="hover:text-foreground transition-colors"> Documentation </a><a href="https://github.com/alex-migwi/clarity" class="hover:text-foreground transition-colors"> GitHub </a><a href="/privacy" class="hover:text-foreground transition-colors"> Privacy Policy </a><a href="/terms" class="hover:text-foreground transition-colors"> Terms of Service </a> </nav> </div> </div> </footer> </main> </div> <script type="module">const e=document.getElementById("sidebar"),t=document.getElementById("sidebar-backdrop"),d=document.getElementById("sidebar-toggle");function s(){if(!e||!t)return;!e.classList.contains("-translate-x-full")?(e.classList.add("-translate-x-full"),t.classList.add("hidden"),document.body.style.overflow=""):(e.classList.remove("-translate-x-full"),t.classList.remove("hidden"),document.body.style.overflow="hidden")}d?.addEventListener("click",s);t?.addEventListener("click",s);</script> <script type="module" src="/clarity-docs/_astro/Mermaid.astro_astro_type_script_index_0_lang.Baj3h8WC.js"></script> </body></html>
